@@ -1,0 +1,239 @@
+#ερωτημα1
+
+set.seed(281200)
+
+game1<-function(k){
+  matches <- list(c("A1", "A16"), c("A8", "A9"), c("A5", "A12"), c("A4", "A13"), c("A3", "A14"), c("A6", "A11"), c("A7", "A10"), c("A2", "A15"))
+  team_means <- c(81.15, 76.30, 77.15, 78.24, 79.20, 76.55, 76.41, 80.87, 76.28, 72.15, 74.86, 73.85, 73.78, 73.59, 69.47, 76.30)
+  
+  winners1 <- c()  #νικητες πρωτης αναμετρησης
+  winners2 <- c()  #νικητες δευτερης αναμετρησης
+  winners3<- c()   #νικητες τριτης αναμετρησης
+  
+  #πρωτη αναμετρηση
+  #πρωτοι αγωνες για ολες τις ομαδες
+  
+  for (i in 1:8) {
+    team1 <- matches[[i]][1]
+    team2 <- matches[[i]][2]
+    
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    score_team1 <- floor(rnorm(1, mean_team1, k))
+    score_team2 <- floor(rnorm(1, mean_team2, k))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners1 <- c(winners1, team1)
+    } else {
+      winners1 <- c(winners1, team2)
+    }
+  }
+  #δευτερη αναμετρηση
+  #αγωνες για τις ομαδες που κερδισαν στον πρωτο γυρο
+  
+  list_winners1<-list(c(winners1[1],winners1[2]),c(winners1[3],winners1[4]),c(winners1[5],winners1[6]),c(winners1[7],winners1[8]))
+  for (i in 1:4){
+    team1 <- list_winners1[[i]][1]
+    team2 <- list_winners1[[i]][2]
+    
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    score_team1 <- floor(rnorm(1, mean_team1, k))
+    score_team2 <- floor(rnorm(1, mean_team2, k))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners2 <- c(winners2, team1)
+    } else {
+      winners2 <- c(winners2, team2)
+    }
+  }
+  #τριτη αναμετρηση
+  #αγωνες για τις ομαδες που κερδισαν στον δευτερο γυρο
+  
+  list_winners2<-list(c(winners2[1],winners2[2]),c(winners2[3],winners2[4]))
+  for (i in 1:2){
+    team1 <- list_winners2[[i]][1]
+    team2 <- list_winners2[[i]][2]
+    
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    score_team1 <- floor(rnorm(1, mean_team1, k))
+    score_team2 <- floor(rnorm(1, mean_team2, k))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners3 <- c(winners3, team1)
+    } else {
+      winners3 <- c(winners3, team2)
+    } 
+  }
+  return(winners3)
+}
+
+game2<-function(k){
+team_means <- c(81.15, 76.30, 77.15, 78.24, 79.20, 76.55, 76.41, 80.87, 76.28, 72.15, 74.86, 73.85, 73.78, 73.59, 69.47, 76.30)
+winners3<-game1(k) 
+team1 <- winners3[1]
+team2 <- winners3[2]
+mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+score_team1 <- floor(rnorm(1, mean_team1, k))
+score_team2 <- floor(rnorm(1, mean_team2, k))
+
+if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+  return(team1)
+} else {
+  return(team2)
+}
+}
+
+nikitis<-replicate(10000,game2(13))   
+win<-table(nikitis)                                  #ποσες φορες η κάθε ομαδα κερδιζει
+telikos<-replicate(10000,game1(13))  
+teliko<-table(telikos)                             #ποσες φορες η κάθε ομαδα φτανει τελικο
+
+
+par(mfrow = c(1, 2))
+barplot(win, xlab="Team", ylab="Number of Wins", main="Results for k=13")
+barplot(teliko, xlab="Team", ylab="Number of Finals", main="Results for k=13")
+
+#πιθανοτητες να φτασει η κάθε ομαδα τελικο και να νικησει
+
+pithanotita_win<-win/10000
+pithanotita_win                    #πιθανοτητες για νικη
+pithanotita_telikou<-teliko/10000
+pithanotita_telikou               #πιθανοτητες για τελικο
+
+sum(pithanotita_telikou)    #παρατηρουμε ότι οι πιθανοτητες για τον τελικο αθροιζουν στο 2
+sum(pithanotita_win)       
+
+#ερωτημα2
+
+nikitis2<-replicate(10000,game2(20))   
+win2<-table(nikitis2)                                     #ποσες φορες η κάθε ομαδα κερδιζει
+telikos2<-replicate(10000,game1(20))  
+teliko2<-table(telikos2)                                #ποσες φορες η κάθε ομαδα φτανει τελικο
+
+par(mfrow = c(1, 2))
+barplot(win2, xlab="Team", ylab="Number of Wins", main="Results for k=20")
+barplot(teliko2, xlab="Team", ylab="Number of Finals", main="Results for k=20")
+
+
+#πιθανοτητες να φτασει η κάθε ομαδα τελικο και να νικησει
+
+pithanotita_win2<-win2/10000 
+pithanotita_win2          #πιθανοτητες για νικη
+pithanotita_telikou2<-teliko2/10000
+pithanotita_telikou2     #πιθανοτητες για τελικο
+
+#ερωτημα3
+
+game3<-function(){
+  matches <- list(c("A1", "A16"), c("A8", "A9"), c("A5", "A12"), c("A4", "A13"), c("A3", "A14"), c("A6", "A11"), c("A7", "A10"), c("A2", "A15"))
+  team_means <- c(81.15, 76.30, 77.15, 78.24, 79.20, 76.55, 76.41, 80.87, 76.28, 72.15, 74.86, 73.85, 73.78, 73.59, 69.47, 76.30)
+  
+  winners1 <- c()  #νικητες πρωτης αναμετρησης
+  winners2 <- c()  #νικητες δευτερης αναμετρησης
+  winners3<- c()   #νικητες τριτης αναμετρησης
+  
+  #πρωτη αναμετρηση
+  #πρωτοι αγωνες για ολες τις ομαδες
+  
+  for (i in 1:8) {
+    team1 <- matches[[i]][1]
+    team2 <- matches[[i]][2]
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    
+    if (team1 %in% c("A1", "A2")) {
+      score_team1 <- floor(rnorm(1, mean_team1-5 , 13))
+    } else {
+      score_team1 <- floor(rnorm(1, mean_team1, 13))
+    }
+    score_team2 <- floor(rnorm(1, mean_team2, 13))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners1 <- c(winners1, team1)
+    } else {
+      winners1 <- c(winners1, team2)
+    }
+  }
+  
+  #δευτερη αναμετρηση
+  #αγωνες για τις ομαδες που κερδισαν στον πρωτο γυρο
+  
+  list_winners1<-list(c(winners1[1],winners1[2]),c(winners1[3],winners1[4]),c(winners1[5],winners1[6]),c(winners1[7],winners1[8]))
+  for (i in 1:4){
+    team1 <- list_winners1[[i]][1]
+    team2 <- list_winners1[[i]][2]
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    
+    if (team1 %in% c("A1", "A2")) {
+      score_team1 <- floor(rnorm(1, mean_team1-5 , 13))
+    } else {
+      score_team1 <- floor(rnorm(1, mean_team1, 13))
+    }
+    score_team2 <- floor(rnorm(1, mean_team2, 13))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners2 <- c(winners2, team1)
+    } else {
+      winners2 <- c(winners2, team2)
+    }
+  }
+  
+  #τριτη αναμετρηση
+  #αγωνες για τις ομαδες που κερδισαν στον δευτερο γυρο
+  
+  list_winners2<-list(c(winners2[1],winners2[2]),c(winners2[3],winners2[4]))
+  for (i in 1:2){
+    team1 <- list_winners2[[i]][1]
+    team2 <- list_winners2[[i]][2]
+    mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+    mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+    score_team1 <- floor(rnorm(1, mean_team1, 13))
+    score_team2 <- floor(rnorm(1, mean_team2, 13))
+    
+    if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+      winners3 <- c(winners3, team1)
+    } else {
+      winners3 <- c(winners3, team2)
+    }
+  }
+  return(winners3)
+}
+ 
+ 
+game4<-function(){
+  team_means <- c(81.15, 76.30, 77.15, 78.24, 79.20, 76.55, 76.41, 80.87, 76.28, 72.15, 74.86, 73.85, 73.78, 73.59, 69.47, 76.30)
+  winners3<-game3() 
+  team1 <- winners3[1]
+  team2 <- winners3[2]
+  mean_team1 <- team_means[as.numeric(gsub("A", "", team1))]
+  mean_team2 <- team_means[as.numeric(gsub("A", "", team2))]
+  score_team1 <- floor(rnorm(1, mean_team1, 13))
+  score_team2 <- floor(rnorm(1, mean_team2, 13))
+  
+  if (score_team1 > score_team2 || (score_team1 == score_team2 && runif(1) > 0.5)) {
+    return(team1)
+  } else {
+    return(team2)
+  }
+}
+
+nikitis3<-replicate(10000,game4())  
+win3<-table(nikitis3)                  #ποσες φορες η κάθε ομαδα κερδιζει
+telikos3<-replicate(10000,game3())  
+teliko3<-table(telikos3)             #ποσες φορες η κάθε ομαδα φτανει τελικο
+
+
+par(mfrow = c(1, 2))
+barplot(win3, xlab="Team", ylab="Number of Wins", main="Results for 3th case")
+barplot(teliko3, xlab="Team", ylab="Number of Finals", main="Results for 3th case")
+
+#πιθανοτητες να φτασει η κάθε ομαδα τελικο και να νικησει
+
+pithanotita_win3<-win3/10000
+pithanotita_win3        #πιθανοτητες για νικη
+pithanotita_telikou3<-teliko3/10000
+pithanotita_telikou3   #πιθανοτητες για τελικο
